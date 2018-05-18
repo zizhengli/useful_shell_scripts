@@ -48,7 +48,7 @@ done
 count=${count:-5}
 
 redEcho () {
-	［-c /dev/stdout ] && {
+	[ -c /dev/stdout ] && {
 		# if stdout is console , turn on color output .
 		echo -ne "\033[1;31m"
 		echo -n "$@"
