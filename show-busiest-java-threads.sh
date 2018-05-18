@@ -6,23 +6,23 @@
 # $ . /show-busy-java-threads -h
 #
 
-PROG＝`basename $0`
+PROG=`basename $0`
 
 usage() {
 cat <<EOF
-	Usage: ${PROG} [OPTION] ...
-	Find out the highest cpu consumed threads of java, and print the stack of these threads.
-	Example: ${PROG} -c 10
-	Options:
-		-p, --pid find out the highest cpu consumed threads from the specifed Java process, default from all java process.
-		-c , --count set the thread count to show , default is 5
-		-h, --help display this help and exit
+Usage: ${PROG} [OPTION] ...
+Find out the highest cpu consumed threads of java, and print the stack of these threads.
+Example: ${PROG} -c 10
+Options:
+	-p, --pid find out the highest cpu consumed threads from the specifed Java process, default from all java process.
+	-c, --count set the thread count to show , default is 5
+	-h, --help display this help and exit
 EOF
 	exit $1
 }
 
-ARGS ＝`getopt -n "$PROG" -a -o c:p:h -1 count:,pid:, help －－”$@”`
-[$? -ne 0] && usage 1
+ARGS=`getopt -n "$PROG" -a -o c:p:h -l count:,pid:,help -- "$@"`
+[ $? -ne 0 ] && usage 1
 eval set -- "${ARGS}"
 
 while true;
@@ -37,10 +37,15 @@ do
 		shift 2
 		;;
 	-h|--help)
-		usage;;
+		usage
+		;;
+	--)
+		shift
+		break
+		;;
 	esac
 done
-count=${count:5}
+count=${count:-5}
 
 redEcho () {
 	［-c /dev/stdout ] && {
@@ -62,7 +67,7 @@ then
 	}
 fi
 
-uuid＝`date ＋%s`_$｛RANDOM}_$$
+uuid=`date +%s`_$RANDOM_$$
 
 cleanupWhenExit() {
 	rm /tmp/${uuid} * &> /dev/null
@@ -72,9 +77,9 @@ trap "cleanupWhenExit" EXIT
 printStackOfThread() {
 	while read threadLine;
 	do
-		pid＝`echo ${threadLine} | awk '{print $1}'`
-		threadId＝`echo ${threadLine} | awk '{print $2}'`
-		threadid0x＝`printf %x ${threadId}`
+		pid=`echo ${threadLine} | awk '{print $1}'`
+		threadId=`echo ${threadLine} | awk '{print $2}'`
+		threadid0x=`printf %x ${threadId}`
 		user=`echo $｛threadLine} | awk '{print $3}'`
 		pcpu=`echo $｛threadLine} | awk '{print $5}'`
 		jstackFile=/tmp/${uuid}_${pid}
@@ -98,5 +103,3 @@ printStackOfThread() {
 	ps -Leo pid,lwp,user,comm,pcpu --no-headers | awk -v "pid=${pid}" '$1==pid,$4=="java"{print $0}' |
 	sort -k5 -r -n | head --lines "${count}" | printStackOfThread
 }
-
-
