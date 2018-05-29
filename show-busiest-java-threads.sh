@@ -57,7 +57,7 @@ redEcho () {
 }
 
 ## Check the existence of jstack command !
-if ! which jstack &> /dev/null ; 
+if ! which jstack &> /dev/null; 
 then
 	[ -n "$JAVA_HOME" ] && [ -f "$JAVA_HOME/bin/jstack" ] && [ -x "$JAVA_HOME/bin/jstack" ] && {
 		export PATH="$JAVA_HOME/bin:$PATH"
@@ -70,9 +70,9 @@ fi
 uuid=`date +%s`_$RANDOM_$$
 
 cleanupWhenExit() {
-	rm /tmp/${uuid} * &> /dev/null
+	rm /tmp/${uuid}_* &> /dev/null
 }
-trap "cleanupWhenExit" EXIT
+#trap "cleanupWhenExit" EXIT
 
 printStackOfThread() {
 	while read threadLine;
@@ -80,8 +80,9 @@ printStackOfThread() {
 		pid=`echo ${threadLine} | awk '{print $1}'`
 		threadId=`echo ${threadLine} | awk '{print $2}'`
 		threadid0x=`printf %x ${threadId}`
-		user=`echo $｛threadLine} | awk '{print $3}'`
-		pcpu=`echo $｛threadLine} | awk '{print $5}'`
+		echo "TEST1 : ${threadid0x}"
+		user=`echo ${threadLine} | awk '{print $3}'`
+		pcpu=`echo ${threadLine} | awk '{print $5}'`
 		jstackFile=/tmp/${uuid}_${pid}
 		
 		[ ! -f "${jstackFile}" ] && {
@@ -92,7 +93,7 @@ printStackOfThread() {
 			}
 		}
 		redEcho "The stack of busy(${pcpu}%) thread(${threadId}/0x${threadid0x}) of java process(${pid}) of user (${user}):"
-		sed "/nid=0x${threadid0x}/,/^$/p" -n ${jstackFile}
+		echo "TEST : `sed "/idx=0x${threadid0x}/,/^$/p" -n ${jstackFile}`"
 	done
 }
 
