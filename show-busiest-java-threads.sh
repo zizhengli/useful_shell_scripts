@@ -67,7 +67,7 @@ then
 	}
 fi
 
-uuid=`date +%s`_$RANDOM_$$
+uuid=`date +%s`_${RANDOM}_$$
 
 cleanupWhenExit() {
 	rm /tmp/${uuid}_* &> /dev/null
@@ -80,7 +80,6 @@ printStackOfThread() {
 		pid=`echo ${threadLine} | awk '{print $1}'`
 		threadId=`echo ${threadLine} | awk '{print $2}'`
 		threadid0x=`printf %x ${threadId}`
-		echo "TEST1 : ${threadid0x}"
 		user=`echo ${threadLine} | awk '{print $3}'`
 		pcpu=`echo ${threadLine} | awk '{print $5}'`
 		jstackFile=/tmp/${uuid}_${pid}
@@ -93,14 +92,13 @@ printStackOfThread() {
 			}
 		}
 		redEcho "The stack of busy(${pcpu}%) thread(${threadId}/0x${threadid0x}) of java process(${pid}) of user (${user}):"
-		echo "TEST : `sed "/idx=0x${threadid0x}/,/^$/p" -n ${jstackFile}`"
+		sed "/nid=0x${threadid0x}/,/^$/p" -n ${jstackFile}
 	done
 }
 
 [ -z "${pid}" ] && {
-	ps -Leo pid,lwp,user,comm,pcpu --no-headers | awk '$4=="java" {print $0}' |
-	sort -k5 -r -n | head --lines "${count}" | printStackOfThread
+	ps -Leo pid,lwp,user,comm,pcpu --no-headers | awk '$4=="java" {print $0}' | sort -k5 -r -n | head --lines "${count}" | printStackOfThread
 } || {
-	ps -Leo pid,lwp,user,comm,pcpu --no-headers | awk -v "pid=${pid}" '$1==pid,$4=="java"{print $0}' |
-	sort -k5 -r -n | head --lines "${count}" | printStackOfThread
+echo "test : $pid"
+	ps -Leo pid,lwp,user,comm,pcpu --no-headers | awk -v "pid=${pid}" '$1==pid,$4=="java"{print $0}' | sort -k5 -r -n | head --lines "${count}" | printStackOfThread
 }
